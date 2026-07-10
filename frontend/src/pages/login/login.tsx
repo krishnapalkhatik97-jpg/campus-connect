@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -43,7 +42,7 @@ export default function Login() {
 
       alert("Login Successful!");
 
-      navigate("/");
+      navigate("/dashboard");
     } catch (error: any) {
       alert(error?.response?.data?.message || "Login Failed");
     } finally {
