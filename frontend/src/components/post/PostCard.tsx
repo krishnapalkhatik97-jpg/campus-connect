@@ -1,14 +1,26 @@
 import {
   Heart,
   MessageCircle,
-  Share2,
   MoreHorizontal,
+  Share2,
 } from "lucide-react";
 
-export default function PostCard() {
+interface PostCardProps {
+  post: {
+    id: string;
+    content: string;
+    image?: string | null;
+    createdAt: string;
+    author: {
+      name: string;
+      avatar?: string | null;
+    };
+  };
+}
+
+export default function PostCard({ post }: PostCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-5">
-
       {/* Header */}
 
       <div className="flex justify-between">
@@ -16,18 +28,21 @@ export default function PostCard() {
         <div className="flex gap-3">
 
           <img
-            src="https://ui-avatars.com/api/?name=Rahul"
+            src={
+              post.author.avatar ||
+              `https://ui-avatars.com/api/?name=${post.author.name}`
+            }
             className="w-12 h-12 rounded-full"
             alt="avatar"
           />
 
           <div>
             <h3 className="font-semibold">
-              Rahul Sharma
+              {post.author.name}
             </h3>
 
             <p className="text-gray-500 text-sm">
-              2 minutes ago
+              {new Date(post.createdAt).toLocaleString()}
             </p>
           </div>
 
@@ -40,14 +55,16 @@ export default function PostCard() {
       {/* Content */}
 
       <p className="mt-4 leading-7">
-        Finally completed my CampusConnect project 🚀🔥
+        {post.content}
       </p>
 
-      <img
-        src="https://picsum.photos/800/400"
-        className="rounded-xl mt-4"
-        alt="post"
-      />
+      {post.image && (
+        <img
+          src={post.image}
+          className="rounded-xl mt-4"
+          alt="post"
+        />
+      )}
 
       {/* Actions */}
 
@@ -69,7 +86,6 @@ export default function PostCard() {
         </button>
 
       </div>
-
     </div>
   );
 }
