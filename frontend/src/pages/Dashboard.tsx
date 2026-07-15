@@ -11,12 +11,16 @@ interface Post {
   content: string;
   image?: string | null;
   createdAt: string;
+
+  _count: {
+    likes: number;
+  };
+
   author: {
     name: string;
     avatar?: string | null;
   };
 }
-
 export default function Dashboard() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +53,7 @@ export default function Dashboard() {
 
         {/* Feed */}
         <div className="col-span-6 space-y-6">
-          <CreatePost />
+          <CreatePost onPostCreated={fetchPosts} />
 
           {loading ? (
             <p className="text-center">Loading posts...</p>

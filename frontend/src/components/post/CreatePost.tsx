@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Image, Send } from "lucide-react";
 import { createPost } from "../../services/postService";
 
-export default function CreatePost() {
+interface CreatePostProps {
+  onPostCreated: () => void;
+}
+
+export default function CreatePost({
+  onPostCreated,
+}: CreatePostProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,9 +23,11 @@ export default function CreatePost() {
 
       await createPost(content);
 
-      alert("✅ Post created successfully!");
-
       setContent("");
+
+      onPostCreated();
+
+      alert("✅ Post created successfully!");
     } catch (error) {
       console.error(error);
       alert("❌ Failed to create post");

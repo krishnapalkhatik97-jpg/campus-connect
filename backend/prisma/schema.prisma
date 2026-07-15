@@ -17,6 +17,7 @@ model User {
 
   // Relations
   posts     Post[]
+  likes     Like[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -30,6 +31,22 @@ model Post {
   authorId  String
   author    User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
+  likes     Like[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Like {
+  id        String   @id @default(cuid())
+
+  userId    String
+  postId    String
+
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post       Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
 }
