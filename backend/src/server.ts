@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import postRoutes from "./routes/post.routes";
 import likeRoutes from "./routes/like.routes";
+import commentRoutes from "./routes/comment.routes";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/likes", likeRoutes);
+app.use("/api/comments", commentRoutes);
 app.get("/", (_req, res) => {
   res.send("🚀 CampusConnect Backend Running");
 });

@@ -1,26 +1,28 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 
-export const createPost = async (
+export const createComment = async (
   req: Request & { user?: any },
   res: Response
 ) => {
   try {
     const { content } = req.body;
+    const { id: postId } = req.params;
 
     if (!content) {
       return res.status(400).json({
-        message: "Content is required",
+        message: "Comment is required",
       });
     }
 
-    const post = await prisma.post.create({
+    const comment = await prisma.comment.create({
       data: {
         content,
-        authorId: req.user.id,
+        postId,
+        userId: req.user.id,
       },
       include: {
-        author: {
+        user: {
           select: {
             id: true,
             name: true,
@@ -30,7 +32,7 @@ export const createPost = async (
       },
     });
 
-    return res.status(201).json(post);
+    return res.status(201).json(comment);
   } catch (error) {
     console.error(error);
 
@@ -40,33 +42,32 @@ export const createPost = async (
   }
 };
 
-export const getPosts = async (
+export const getComments = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const posts = await prisma.post.findMany({
+    const { id: postId } = req.params;
+
+    const comments = await prisma.comment.findMany({
+      where: {
+        postId,
+      },
       include: {
-        author: {
+        user: {
           select: {
             id: true,
             name: true,
             avatar: true,
           },
         },
-        _count: {
-          select: {
-            likes: true,
-            comments: true,
-          },
-        },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
 
-    return res.status(200).json(posts);
+    return res.status(200).json(comments);
   } catch (error) {
     console.error(error);
 
