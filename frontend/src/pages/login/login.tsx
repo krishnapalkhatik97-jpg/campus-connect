@@ -43,6 +43,7 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("userName", data.user.name);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       alert("Login Successful!");
 

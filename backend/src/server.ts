@@ -8,7 +8,7 @@ import likeRoutes from "./routes/like.routes";
 import commentRoutes from "./routes/comment.routes";
 import followRoutes from "./routes/follow.routes";
 import profileRoutes from "./routes/profile.routes";
-
+import searchRoutes from "./routes/search.routes";
 dotenv.config();
 
 const app = express();
@@ -21,6 +21,7 @@ app.use("/api/likes", likeRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/follow", followRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/search", searchRoutes);
 app.get("/", (_req, res) => {
   res.send("🚀 CampusConnect Backend Running");
 });

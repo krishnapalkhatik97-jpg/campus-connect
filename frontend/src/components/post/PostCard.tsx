@@ -10,6 +10,7 @@ import {
   createComment,
   getComments,
 } from "../../services/commentService";
+import { Link } from "react-router-dom";
 
 interface PostCardProps {
   post: {
@@ -24,6 +25,7 @@ interface PostCardProps {
     };
 
     author: {
+      id: string;
       name: string;
       avatar?: string | null;
     };
@@ -82,17 +84,23 @@ useEffect(() => {
       {/* Header */}
       <div className="flex justify-between">
         <div className="flex gap-3">
-          <img
-            src={
-              post.author.avatar ||
+          <Link to={`/profile/${post.author.id}`}>
+           <img
+             src={
+               post.author.avatar ||
               `https://ui-avatars.com/api/?name=${post.author.name}`
-            }
-            className="w-12 h-12 rounded-full"
-            alt="avatar"
-          />
+             }
+             className="w-12 h-12 rounded-full cursor-pointer"
+             alt="avatar"
+             />
+          </Link>
 
           <div>
-            <h3 className="font-semibold">{post.author.name}</h3>
+            <Link to={`/profile/${post.author.id}`}>
+              <h3 className="font-semibold hover:text-blue-600 cursor-pointer">
+               {post.author.name}
+                </h3>
+             </Link>
 
             <p className="text-gray-500 text-sm">
               {new Date(post.createdAt).toLocaleString()}

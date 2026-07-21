@@ -10,17 +10,19 @@ import { useNavigate } from "react-router-dom";
 export default function LeftSidebar() {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   return (
     <aside className="bg-white rounded-2xl shadow-sm p-6">
       <div className="flex flex-col items-center">
         <img
-          src="https://ui-avatars.com/api/?name=Krishna"
+          src={`https://ui-avatars.com/api/?name=${user.name || "User"}`}
           className="w-20 h-20 rounded-full"
           alt="Profile"
         />
 
         <h2 className="font-bold text-xl mt-4">
-          Krishna
+          {user.name || "User"}
         </h2>
 
         <p className="text-gray-500">
@@ -41,7 +43,7 @@ export default function LeftSidebar() {
         </div>
 
         <div
-          onClick={() => navigate("/profile/test")}
+          onClick={() => navigate(`/profile/${user.id}`)}
           className="flex items-center gap-3 cursor-pointer hover:text-blue-600"
         >
           <User size={20} />
