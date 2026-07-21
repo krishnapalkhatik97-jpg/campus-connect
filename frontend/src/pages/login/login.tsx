@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -38,7 +39,10 @@ export default function Login() {
         password: formData.password,
       });
 
+      // Save Login Details
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.user.id);
+      localStorage.setItem("userName", data.user.name);
 
       alert("Login Successful!");
 
@@ -66,6 +70,7 @@ export default function Login() {
         <CardContent className="space-y-5">
           <div>
             <Label>Email</Label>
+
             <Input
               name="email"
               type="email"
@@ -77,6 +82,7 @@ export default function Login() {
 
           <div>
             <Label>Password</Label>
+
             <Input
               name="password"
               type="password"
@@ -98,7 +104,7 @@ export default function Login() {
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-blue-600 font-semibold"
+              className="text-blue-600 font-semibold hover:underline"
             >
               Register
             </Link>

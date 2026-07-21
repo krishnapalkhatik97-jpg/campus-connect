@@ -5,16 +5,18 @@ import {
   Bookmark,
   Calendar,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function LeftSidebar() {
+  const navigate = useNavigate();
+
   return (
     <aside className="bg-white rounded-2xl shadow-sm p-6">
-
       <div className="flex flex-col items-center">
-
         <img
           src="https://ui-avatars.com/api/?name=Krishna"
           className="w-20 h-20 rounded-full"
+          alt="Profile"
         />
 
         <h2 className="font-bold text-xl mt-4">
@@ -24,19 +26,24 @@ export default function LeftSidebar() {
         <p className="text-gray-500">
           Mechanical Engineering
         </p>
-
       </div>
 
       <hr className="my-6" />
 
       <div className="space-y-5">
 
-        <div className="flex items-center gap-3 cursor-pointer hover:text-blue-600">
+        <div
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-3 cursor-pointer hover:text-blue-600"
+        >
           <House size={20} />
           Home
         </div>
 
-        <div className="flex items-center gap-3 cursor-pointer hover:text-blue-600">
+        <div
+          onClick={() => navigate("/profile/test")}
+          className="flex items-center gap-3 cursor-pointer hover:text-blue-600"
+        >
           <User size={20} />
           Profile
         </div>
@@ -57,7 +64,6 @@ export default function LeftSidebar() {
         </div>
 
       </div>
-
     </aside>
   );
 }

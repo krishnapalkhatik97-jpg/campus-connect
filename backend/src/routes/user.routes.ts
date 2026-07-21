@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { getProfile } from "../controllers/user.controller";
+import express from "express";
+import { getMe } from "../controllers/user.controller";
 import { protect } from "../middleware/auth.middleware";
 
-const router = Router();
+const router = express.Router();
 
-router.get("/profile", protect, getProfile);
+router.get("/me", protect, getMe);
 
 export default router;

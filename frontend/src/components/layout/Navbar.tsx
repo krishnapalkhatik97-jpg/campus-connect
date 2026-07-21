@@ -9,18 +9,23 @@ import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
-
+  const userId = localStorage.getItem("userId");
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
     navigate("/login");
-  };
+    };
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto h-16 flex items-center justify-between px-6">
 
         {/* Logo */}
-        <h1 className="text-3xl font-bold text-blue-600 tracking-tight cursor-pointer">
+        <h1
+          onClick={() => navigate("/dashboard")}
+          className="text-3xl font-bold text-blue-600 tracking-tight cursor-pointer"
+        >
           CampusConnect
         </h1>
 
@@ -38,32 +43,40 @@ export default function Navbar() {
         {/* Right Side Icons */}
         <div className="flex items-center gap-6">
 
+          {/* Home */}
           <House
             size={22}
+            onClick={() => navigate("/dashboard")}
             className="cursor-pointer hover:text-blue-600 transition"
           />
 
+          {/* Notifications */}
           <Bell
             size={22}
             className="cursor-pointer hover:text-blue-600 transition"
           />
 
+          {/* Profile */}
           <User
             size={22}
+            onClick={() => navigate(`/profile/${userId}`)}
             className="cursor-pointer hover:text-blue-600 transition"
           />
 
+          {/* Logout */}
           <LogOut
             size={22}
             onClick={handleLogout}
             className="cursor-pointer hover:text-red-600 transition"
           />
 
+          {/* Avatar */}
           <img
-            src="https://ui-avatars.com/api/?name=KP&background=2563eb&color=fff"
-            alt="Profile"
-            className="w-10 h-10 rounded-full cursor-pointer"
-          />
+             src="https://ui-avatars.com/api/?name=KP&background=2563eb&color=fff"
+             alt="Profile"
+             onClick={() => navigate(`/profile/${userId}`)}
+             className="w-10 h-10 rounded-full cursor-pointer hover:scale-105 transition"
+            />
 
         </div>
 
