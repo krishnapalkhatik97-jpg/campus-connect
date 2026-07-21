@@ -5,6 +5,7 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile/Profile";
+import Chat from "./pages/chat/Chat";
 
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/chat" element={<Chat />} />
 
         {/* Protected Dashboard */}
         <Route
