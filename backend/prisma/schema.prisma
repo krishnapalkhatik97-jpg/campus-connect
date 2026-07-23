@@ -23,13 +23,15 @@ model User {
   following  Follow[] @relation("Following")
   followers  Follow[] @relation("Followers")
 
+  conversations      Conversation[] @relation("ConversationParticipants")
+  messages           Message[]
+
+  // Notifications
+  notifications      Notification[] @relation("NotificationReceiver")
+  sentNotifications  Notification[] @relation("NotificationSender")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-
-
-conversations Conversation[] @relation("ConversationParticipants")
-messages      Message[]
 }
 
 model Post {
@@ -77,35 +79,60 @@ model Comment {
 
 model Follow {
   id           String   @id @default(cuid())
+
   followerId   String
   followingId  String
 
-  follower     User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
-  following    User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  follower      User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following     User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
 }
+
 model Conversation {
-  id           String    @id @default(cuid())
-  participants User[]    @relation("ConversationParticipants")
-  messages     Message[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id            String    @id @default(cuid())
+
+  participants  User[]    @relation("ConversationParticipants")
+  messages      Message[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Message {
-  id             String        @id @default(cuid())
+  id             String       @id @default(cuid())
   content        String
 
   senderId       String
-  sender         User          @relation(fields: [senderId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
 
   conversationId String
-  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 
-  createdAt      DateTime      @default(now())
+  createdAt      DateTime @default(now())
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+
+  receiverId String
+  receiver   User @relation("NotificationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  senderId   String?
+  sender     User? @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  type       String
+
+  postId     String?
+  message    String?
+
+  isRead     Boolean @default(false)
+
+  createdAt  DateTime @default(now())
+
+  @@index([receiverId])
 }

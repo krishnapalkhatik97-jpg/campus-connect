@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { createNotification } from "../services/notificationService";
 
 export const createComment = async (
   req: Request & { user?: any },
@@ -12,6 +13,22 @@ export const createComment = async (
     if (!content) {
       return res.status(400).json({
         message: "Comment is required",
+      });
+    }
+
+    // Find post owner
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: {
+        authorId: true,
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
       });
     }
 
@@ -31,6 +48,17 @@ export const createComment = async (
         },
       },
     });
+
+    // Create notification (don't notify yourself)
+    if (post.authorId !== req.user.id) {
+      await createNotification(
+        post.authorId,
+        req.user.id,
+        "COMMENT",
+        postId,
+        "commented on your post"
+      );
+    }
 
     return res.status(201).json(comment);
   } catch (error) {

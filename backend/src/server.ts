@@ -14,6 +14,7 @@ import profileRoutes from "./routes/profile.routes";
 import searchRoutes from "./routes/search.routes";
 import conversationRoutes from "./routes/conversation.routes";
 import messageRoutes from "./routes/message.routes";
+import notificationRoutes from "./routes/notification.routes";
 
 dotenv.config();
 
@@ -32,7 +33,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
-
+app.use("/api/notifications", notificationRoutes);
 app.get("/", (_req, res) => {
   res.send("🚀 CampusConnect Backend Running");
 });

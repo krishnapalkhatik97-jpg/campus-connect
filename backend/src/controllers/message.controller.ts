@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { getIO } from "../socket";
+import { createNotification } from "../services/notificationService";
 
+// =======================
 // Send Message
+// =======================
 export const sendMessage = async (
-  req: Request,
+  req: Request & { user?: any },
   res: Response
 ) => {
   try {
-    const senderId = (req as any).user.id;
+    const senderId = req.user!.id;
     const { conversationId, content } = req.body;
 
     if (!conversationId || !content) {
@@ -17,6 +20,7 @@ export const sendMessage = async (
       });
     }
 
+    // Save Message
     const message = await prisma.message.create({
       data: {
         content,
@@ -35,6 +39,7 @@ export const sendMessage = async (
       },
     });
 
+    // Update conversation timestamp
     await prisma.conversation.update({
       where: {
         id: conversationId,
@@ -44,7 +49,7 @@ export const sendMessage = async (
       },
     });
 
-    // Get conversation participants
+    // Find receiver
     const conversation = await prisma.conversation.findUnique({
       where: {
         id: conversationId,
@@ -60,9 +65,27 @@ export const sendMessage = async (
       );
 
       if (receiver) {
+        // Save Notification
+        await createNotification(
+          receiver.id,
+          senderId,
+          "MESSAGE",
+          undefined,
+          "sent you a message"
+        );
+
         const io = getIO();
 
+        // Real-time chat
         io.to(receiver.id).emit("newMessage", message);
+
+        // Real-time notification
+        io.to(receiver.id).emit("newNotification", {
+          sender: message.sender,
+          message: "sent you a message",
+          type: "MESSAGE",
+          createdAt: new Date(),
+        });
 
         console.log(
           `📨 Message sent from ${senderId} to ${receiver.id}`
@@ -80,21 +103,22 @@ export const sendMessage = async (
   }
 };
 
+// =======================
 // Get Messages
+// =======================
 export const getMessages = async (
   req: Request,
   res: Response
 ) => {
   try {
     const conversationId = req.params.conversationId as string;
-    if (!conversationId) {
-  return res.status(400).json({
-    message: "Conversation ID is required",
-  });
-}
-           
 
-     
+    if (!conversationId) {
+      return res.status(400).json({
+        message: "Conversation ID is required",
+      });
+    }
+
     const messages = await prisma.message.findMany({
       where: {
         conversationId,

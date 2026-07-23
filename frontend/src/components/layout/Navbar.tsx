@@ -6,9 +6,15 @@ import {
   LogOut,
   MessageCircle,
 } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+
 import { searchUsers } from "@/services/searchService";
+import {
+  getNotifications,
+  markNotificationRead,
+} from "@/services/notificationService";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -18,12 +24,37 @@ export default function Navbar() {
   const [results, setResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("userName");
     navigate("/login");
   };
+
+  const handleNotificationClick = async (notification: any) => {
+    try {
+        if (!notification.isRead) {
+            await markNotificationRead(notification.id);
+
+            setNotifications((prev) =>
+                prev.map((item) =>
+                item.id === notification.id
+                ? { ...item, isRead: true }
+               : item
+                )
+           );
+          }
+
+    if (notification.postId) {
+      navigate("/dashboard");
+    }
+  } catch (error) {
+    console.error(error);
+    }
+     };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -45,6 +76,25 @@ export default function Navbar() {
 
     return () => clearTimeout(timer);
   }, [query]);
+
+
+  useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const data = await getNotifications();
+       setNotifications(data);
+       } catch (error) {
+         console.error(error);
+       }
+    };
+
+     fetchNotifications();
+   }, []);
+
+
+   const unreadCount = notifications.filter(
+     (notification) => !notification.isRead
+      ).length;
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -117,10 +167,85 @@ export default function Navbar() {
           />
 
           {/* Notifications */}
-          <Bell
-            size={22}
-            className="cursor-pointer hover:text-blue-600 transition"
-          />
+                    {/* Notifications */}
+<div className="relative">
+
+  <Bell
+    size={22}
+    onClick={() => setShowNotifications(!showNotifications)}
+    className="cursor-pointer hover:text-blue-600 transition"
+  />
+
+  {unreadCount > 0 && (
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+      {unreadCount}
+    </span>
+  )}
+
+  {showNotifications && (
+    <div className="absolute right-0 mt-4 w-80 bg-white rounded-xl shadow-xl border z-50 max-h-96 overflow-y-auto">
+
+      <div className="p-4 border-b font-bold text-lg">
+        Notifications
+      </div>
+
+      {notifications.length === 0 ? (
+        <div className="p-6 text-center text-gray-500">
+          No notifications
+        </div>
+      ) : (
+        notifications.map((notification) => (
+          <div
+            key={notification.id}
+            onClick={() =>
+              handleNotificationClick(notification)
+            }
+            className={`p-4 border-b cursor-pointer hover:bg-gray-100 transition ${
+              !notification.isRead
+                ? "bg-blue-50"
+                : ""
+            }`}
+          >
+            <div className="flex gap-3">
+
+              <img
+                src={
+                  notification.sender?.avatar ||
+                  `https://ui-avatars.com/api/?name=${
+                    notification.sender?.name || "U"
+                  }`
+                }
+                className="w-10 h-10 rounded-full"
+                alt=""
+              />
+
+              <div>
+
+                <p className="font-semibold">
+                  {notification.sender?.name}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  {notification.message}
+                </p>
+
+                <p className="text-xs text-gray-400 mt-1">
+                  {new Date(
+                    notification.createdAt
+                  ).toLocaleString()}
+                </p>
+
+              </div>
+
+            </div>
+          </div>
+        ))
+      )}
+
+    </div>
+  )}
+
+</div>
 
           {/* Chat */}
           <MessageCircle

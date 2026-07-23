@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { createNotification } from "../services/notificationService";
 
 export const toggleLike = async (
   req: Request & { user?: any },
@@ -18,6 +19,7 @@ export const toggleLike = async (
       },
     });
 
+    // Unlike
     if (existingLike) {
       await prisma.like.delete({
         where: {
@@ -40,12 +42,40 @@ export const toggleLike = async (
       });
     }
 
+    // Find post owner
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+      select: {
+        authorId: true,
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+
+    // Like the post
     await prisma.like.create({
       data: {
         userId,
         postId,
       },
     });
+
+    // Create notification (don't notify yourself)
+    if (post.authorId !== userId) {
+      await createNotification(
+        post.authorId,
+        userId,
+        "LIKE",
+        postId,
+        "liked your post"
+      );
+    }
 
     const likesCount = await prisma.like.count({
       where: {
@@ -57,7 +87,6 @@ export const toggleLike = async (
       liked: true,
       likesCount,
     });
-
   } catch (error) {
     console.error(error);
 

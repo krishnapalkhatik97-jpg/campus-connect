@@ -1,9 +1,13 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { createNotification } from "../services/notificationService";
 
-export const toggleFollow = async (req: Request, res: Response) => {
+export const toggleFollow = async (
+  req: Request & { user?: any },
+  res: Response
+) => {
   try {
-    const followerId = req.user.id; // Logged-in user
+    const followerId = req.user.id;
     const { userId: followingId } = req.params;
 
     if (followerId === followingId) {
@@ -21,6 +25,7 @@ export const toggleFollow = async (req: Request, res: Response) => {
       },
     });
 
+    // Unfollow
     if (existingFollow) {
       await prisma.follow.delete({
         where: {
@@ -37,6 +42,7 @@ export const toggleFollow = async (req: Request, res: Response) => {
       });
     }
 
+    // Follow
     await prisma.follow.create({
       data: {
         followerId,
@@ -44,12 +50,22 @@ export const toggleFollow = async (req: Request, res: Response) => {
       },
     });
 
+    // Notification
+    await createNotification(
+      followingId,
+      followerId,
+      "FOLLOW",
+      undefined,
+      "started following you"
+    );
+
     return res.json({
       message: "Followed successfully",
       following: true,
     });
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       message: "Server Error",
     });
