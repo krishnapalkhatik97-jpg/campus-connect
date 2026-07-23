@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { login } from "@/services/authService";
+import socket from "@/socket";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,10 @@ export default function Login() {
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("userName", data.user.name);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Connect Socket
+      socket.connect();
+      socket.emit("setup", data.user.id);
 
       alert("Login Successful!");
 

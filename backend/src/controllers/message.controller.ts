@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { getIO } from "../socket";
 
 // Send Message
 export const sendMessage = async (
@@ -34,7 +35,6 @@ export const sendMessage = async (
       },
     });
 
-    // Update conversation timestamp
     await prisma.conversation.update({
       where: {
         id: conversationId,
@@ -44,9 +44,36 @@ export const sendMessage = async (
       },
     });
 
+    // Get conversation participants
+    const conversation = await prisma.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+      include: {
+        participants: true,
+      },
+    });
+
+    if (conversation) {
+      const receiver = conversation.participants.find(
+        (participant) => participant.id !== senderId
+      );
+
+      if (receiver) {
+        const io = getIO();
+
+        io.to(receiver.id).emit("newMessage", message);
+
+        console.log(
+          `📨 Message sent from ${senderId} to ${receiver.id}`
+        );
+      }
+    }
+
     return res.status(201).json(message);
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       message: "Server Error",
     });
@@ -60,7 +87,14 @@ export const getMessages = async (
 ) => {
   try {
     const conversationId = req.params.conversationId as string;
+    if (!conversationId) {
+  return res.status(400).json({
+    message: "Conversation ID is required",
+  });
+}
+           
 
+     
     const messages = await prisma.message.findMany({
       where: {
         conversationId,
@@ -83,6 +117,7 @@ export const getMessages = async (
     return res.status(200).json(messages);
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       message: "Server Error",
     });

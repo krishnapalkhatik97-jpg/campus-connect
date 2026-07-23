@@ -2,31 +2,62 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import LeftSidebar from "../../components/layout/LeftSidebar";
 import RightSidebar from "../../components/layout/RightSidebar";
-
+import socket from "../../socket";
 import {
   getConversations,
   getMessages,
   sendMessage,
 } from "../../services/chatService.ts";
+import { useLocation } from "react-router-dom";
 
 export default function Chat() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const location = useLocation();
+
 
   useEffect(() => {
-    loadConversations();
-  }, []);
+  loadConversations();
+}, [location.state]);
+
+
 
   const loadConversations = async () => {
-    try {
-      const data = await getConversations();
-      setConversations(data);
-    } catch (error) {
-      console.error(error);
+  try {
+    const data = await getConversations();
+    setConversations(data);
+
+    const passedConversation = (location.state as any)?.conversation;
+
+    if (passedConversation) {
+      const conversation = data.find(
+        (c: any) => c.id === passedConversation.id
+      );
+
+      if (conversation) {
+        openConversation(conversation);
+      }
     }
+  } catch (error) {
+    console.error(error);
+  }
+};
+  useEffect(() => {
+  socket.on("newMessage", (message: any) => {
+    if (message.conversationId === selectedConversation?.id) {
+      setMessages((prev) => [...prev, message]);
+    }
+
+    // Refresh conversation list so latest message appears
+    loadConversations();
+  });
+
+  return () => {
+    socket.off("newMessage");
   };
+}, [selectedConversation]);
 
   const openConversation = async (conversation: any) => {
     setSelectedConversation(conversation);
@@ -43,13 +74,18 @@ export default function Chat() {
     if (!selectedConversation || !newMessage.trim()) return;
 
     try {
-      const message = await sendMessage(
-        selectedConversation.id,
-        newMessage
+     const message = await sendMessage(
+      selectedConversation.id,
+      newMessage
       );
 
-      setMessages((prev) => [...prev, message]);
-      setNewMessage("");
+    // Show sender's message immediately
+    setMessages((prev) => [...prev, message]);
+
+     // Refresh conversation preview
+    loadConversations();
+
+    setNewMessage("");
     } catch (error) {
       console.error(error);
     }

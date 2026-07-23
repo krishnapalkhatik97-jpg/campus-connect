@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { createConversation } from "@/services/chatService.ts";
 
 import { getProfile } from "@/services/profileService";
 import { toggleFollow } from "@/services/followService";
@@ -8,7 +9,7 @@ import type { Profile as ProfileType } from "@/types/profile";
 
 export default function Profile() {
   const { id } = useParams();
-
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileType | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -50,6 +51,21 @@ export default function Profile() {
       console.error("Follow Error:", error);
     }
   };
+  const handleMessage = async () => {
+  if (!profile) return;
+
+  try {
+    const conversation = await createConversation(profile.id);
+
+    navigate("/chat", {
+      state: {
+        conversation,
+      },
+    });
+  } catch (error) {
+    console.error("Message Error:", error);
+  }
+};
 
   if (loading) {
     return (
@@ -120,16 +136,25 @@ export default function Profile() {
 
               </div>
 
+              <div className="flex gap-3 mt-6">
               <button
                 onClick={handleFollow}
-                className={`mt-6 px-6 py-2 rounded-lg text-white font-semibold transition ${
-                  isFollowing
-                    ? "bg-gray-700 hover:bg-gray-800"
-                    : "bg-blue-600 hover:bg-blue-700"
+                className={`px-6 py-2 rounded-lg text-white font-semibold transition ${
+                isFollowing
+                ? "bg-gray-700 hover:bg-gray-800"
+                 : "bg-blue-600 hover:bg-blue-700"
                 }`}
-              >
-                {isFollowing ? "Following" : "Follow"}
+                >
+              {isFollowing ? "Following" : "Follow"}
               </button>
+
+              <button
+              onClick={handleMessage}
+              className="px-6 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700"
+              >
+              Message
+             </button>
+</div>
 
             </div>
 
